@@ -1,6 +1,7 @@
-import { app, ipcMain } from 'electron';
+import { app, ipcMain, WebContents } from 'electron';
 import GameReader from './GameReader';
-import { keyboardWatcher } from 'node-keyboard-watcher';
+import keyboardWatcherModule from 'node-keyboard-watcher';
+const { keyboardWatcher } = keyboardWatcherModule;
 import Store from 'electron-store';
 import { ISettings } from '../common/ISettings';
 import { IpcHandlerMessages, IpcMessages, IpcRendererMessages, IpcSyncMessages } from '../common/ipc-messages';
@@ -21,12 +22,28 @@ let pushToTalkShortcut: K | undefined;
 let deafenShortcut: K | undefined;
 let muteShortcut: K | undefined;
 let impostorRadioShortcut: K | undefined;
+let keySender: WebContents | undefined;
+let pushToTalkHeld = false;
+let impostorRadioHeld = false;
+const toggleGrants = new Map<number, { mute: boolean; deafen: boolean }>();
+
+function releaseHeldKeys(): void {
+	if (pushToTalkHeld) {
+		pushToTalkHeld = false;
+		keySender?.send(IpcRendererMessages.PUSH_TO_TALK, false);
+	}
+	if (impostorRadioHeld) {
+		impostorRadioHeld = false;
+		keySender?.send(IpcRendererMessages.IMPOSTOR_RADIO, false);
+	}
+}
+
 function resetKeyHooks(): void {
+	releaseHeldKeys();
 	pushToTalkShortcut = store.get('pushToTalkShortcut', 'V') as K;
 	deafenShortcut = store.get('deafenShortcut', 'RControl') as K;
 	muteShortcut = store.get('muteShortcut', 'RAlt') as K;
 	impostorRadioShortcut = store.get('impostorRadioShortcut', 'F') as K;
-	keyboardWatcher.clearKeyHooks();
 	addKeyHandler(pushToTalkShortcut);
 	addKeyHandler(deafenShortcut);
 	addKeyHandler(muteShortcut);
@@ -59,51 +76,50 @@ ipcMain.handle(IpcMessages.REQUEST_MOD, () => {
 	return gameReader.loadedMod.id;
 });
 
+ipcMain.handle(IpcMessages.REQUEST_GAME_INFO, () => {
+	if (!readingGame) return null;
+	return gameReader.getGameInfo();
+});
+
 ipcMain.handle(IpcHandlerMessages.START_HOOK, async (event) => {
 	if (!readingGame) {
 		readingGame = true;
-		let speaking: number = 0
+		keySender = event.sender;
 		resetKeyHooks();
 
 		keyboardWatcher.on('keydown', (keyId: number) => {
-			if (keyCodeMatches(pushToTalkShortcut!, keyId)) {
-				speaking += 1;
+			if (keyCodeMatches(pushToTalkShortcut!, keyId) && !pushToTalkHeld) {
+				pushToTalkHeld = true;
+				event.sender.send(IpcRendererMessages.PUSH_TO_TALK, true);
 			}
-			if (keyCodeMatches(impostorRadioShortcut!, keyId) && gameReader.lastState.players?.find((value) => {return value.clientId === gameReader.lastState.clientId})?.isImpostor) {
-				speaking += 1;
+			if (keyCodeMatches(impostorRadioShortcut!, keyId) && !impostorRadioHeld) {
+				impostorRadioHeld = true;
 				event.sender.send(IpcRendererMessages.IMPOSTOR_RADIO, true);
 			}
-
-			// Cover weird cases which shouldn't happen but just in case
-			if (speaking > 2) {
-				speaking = 2;
-			}
-			if (speaking) {
-				event.sender.send(IpcRendererMessages.PUSH_TO_TALK, true);
+			if (!toggleGrants.has(keyId)) {
+				toggleGrants.set(keyId, {
+					mute: keyCodeMatches(muteShortcut!, keyId),
+					deafen: keyCodeMatches(deafenShortcut!, keyId),
+				});
 			}
 		});
 
 		keyboardWatcher.on('keyup', (keyId: number) => {
-			if (keyCodeMatches(pushToTalkShortcut!, keyId)) {
-				speaking -= 1;
+			if (keyCodeMatches(pushToTalkShortcut!, keyId) && pushToTalkHeld) {
+				pushToTalkHeld = false;
+				event.sender.send(IpcRendererMessages.PUSH_TO_TALK, false);
 			}
-			if (keyCodeMatches(deafenShortcut!, keyId)) {
+			const grant = toggleGrants.get(keyId);
+			toggleGrants.delete(keyId);
+			if (grant?.deafen) {
 				event.sender.send(IpcRendererMessages.TOGGLE_DEAFEN);
 			}
-			if (keyCodeMatches(muteShortcut!, keyId)) {
+			if (grant?.mute) {
 				event.sender.send(IpcRendererMessages.TOGGLE_MUTE);
 			}
-			if (keyCodeMatches(impostorRadioShortcut!, keyId) && gameReader.lastState.players?.find((value) => {return value.clientId === gameReader.lastState.clientId})?.isImpostor) {
-				speaking -= 1;
+			if (keyCodeMatches(impostorRadioShortcut!, keyId) && impostorRadioHeld) {
+				impostorRadioHeld = false;
 				event.sender.send(IpcRendererMessages.IMPOSTOR_RADIO, false);
-			}
-
-			// Cover weird cases which shouldn't happen but just in case
-			if (speaking < 0) {
-				speaking = 0;
-			}
-			if (!speaking) {
-				event.sender.send(IpcRendererMessages.PUSH_TO_TALK, false);
 			}
 		});
 
@@ -135,26 +151,33 @@ ipcMain.handle(IpcHandlerMessages.START_HOOK, async (event) => {
 	}
 });
 
-ipcMain.on('reload', async (_, lobbybrowser) => {
-	if (!lobbybrowser) {
-		global.mainWindow?.reload();
+type WindowTarget = 'main' | 'lobbies' | 'settings';
+
+function targetWindow(target: WindowTarget = 'main') {
+	switch (target) {
+		case 'lobbies':
+			return global.lobbyBrowser;
+		case 'settings':
+			return global.settingsWindow;
+		default:
+			return global.mainWindow;
 	}
-	global.lobbyBrowser?.reload();
+}
+
+ipcMain.on('reload', async (_, target: WindowTarget) => {
+	targetWindow(target)?.reload();
 });
 
-ipcMain.on('minimize', async (_, lobbybrowser) => {
-	if (!lobbybrowser) {
-		global.mainWindow?.minimize();
-	}
-	global.lobbyBrowser?.minimize();
+ipcMain.on('minimize', async (_, target: WindowTarget) => {
+	targetWindow(target)?.minimize();
 });
 
-ipcMain.handle("getlocale", () => {
+ipcMain.handle('getlocale', () => {
 	return app.getLocale();
 });
 
 ipcMain.on('relaunch', async () => {
-	app.relaunch();  
+	app.relaunch();
 	app.exit();
 });
 
@@ -165,7 +188,7 @@ const keycodeMap = {
 	Enter: 0x0d,
 	Up: 0x26,
 	Down: 0x28,
-	Left: 0x24,
+	Left: 0x25,
 	Right: 0x27,
 	Home: 0x24,
 	End: 0x23,
@@ -205,6 +228,12 @@ const keycodeMap = {
 	Numpad7: 0x67,
 	Numpad8: 0x68,
 	Numpad9: 0x69,
+	NumpadMultiply: 0x6a,
+	NumpadAdd: 0x6b,
+	NumpadSubtract: 0x6d,
+	NumpadDecimal: 0x6e,
+	NumpadDivide: 0x6f,
+	CapsLock: 0x14,
 	Disabled: -1,
 };
 type K = keyof typeof keycodeMap;

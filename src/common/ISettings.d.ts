@@ -18,7 +18,7 @@ export interface ISettings {
 	enableOverlay: boolean;
 	meetingOverlay: boolean;
 
-	localLobbySettings: ILobbySettings;
+	myLobbySettings: ILobbySettings;
 	ghostVolumeAsImpostor: number;
 	crewVolumeAsGhost: number;
 	masterVolume: number;
@@ -27,10 +27,10 @@ export interface ISettings {
 	micSensitivity: number;
 	micSensitivityEnabled: boolean;
 	mobileHost: boolean;
-	vadEnabled: boolean;
 	hardware_acceleration: boolean;
 	echoCancellation: boolean;
 	noiseSuppression: boolean;
+	autoGainControl: boolean;
 	oldSampleDebug: boolean;
 
 	enableSpatialAudio: boolean;
@@ -50,9 +50,12 @@ export interface ILobbySettings {
 	hearImpostorsInVents: boolean;
 	impostersHearImpostersInvent: boolean;
 	impostorRadioEnabled: boolean;
+	impostorRadioPrivate: boolean;
 	commsSabotage: boolean;
 	deadOnly: boolean;
 	meetingGhostOnly: boolean;
+	ghostsCanTalkIngame: boolean;
+	gracePeriod: number;
 	hearThroughCameras: boolean;
 	wallsBlockAudio: boolean;
 	publicLobby_on: boolean;

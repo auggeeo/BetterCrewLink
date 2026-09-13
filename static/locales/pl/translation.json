@@ -2,6 +2,7 @@
 	"settings": {
 		"title": "Ustawienia",
 		"language": "Język",
+		"general": "Ogólne",
 		"warning": "Jesteś pewien?",
 		"lobbysettings": {
 			"title": "Ustawienia poczekalni",
@@ -22,7 +23,15 @@
 			"meetings_only": "Czat głosowy włączony tylko podczas spotkań i w poczekalni",
 			"meetings_only_warning": "To ustawienie wyłącza czat głosowy dla graczy, którzy nie są w spotkaniu.",
 			"meetings_only_warning2": "Czat głosowy jest włączony tylko na spotkaniach.",
+			"meetings_only_requires": "Najpierw włącz czat głosowy tylko podczas spotkań i w poczekalni.",
+			"ghosts_can_talk_ingame": "Duchy mogą rozmawiać w trakcie gry",
+			"ghosts_can_talk_ingame_description": "Duchy rozmawiają dalej przez całą rundę i słyszą się nawzajem z dowolnego miejsca na mapie, jak podczas spotkania. Żywi gracze nadal ich nie słyszą.",
+			"grace_period": "Okres łaski",
+			"grace_period_description": "Sekundy, przez które głos pozostaje aktywny po rozpoczęciu rundy, aby nikt nie został ucięty w połowie zdania.",
 			"impostor_radio": "Radio dla impostorów",
+			"impostor_radio_private": "Prywatne radio impostora",
+			"impostor_radio_private_description": "Pobliska załoga nie słyszy impostora przez radio.",
+			"impostor_radio_private_requires": "Najpierw włącz radio impostora.",
 			"public_lobby": {
 				"change_settings": "Zmień informacje o poczekalni",
 				"title": "Nazwa",
@@ -31,7 +40,26 @@
 				"language": "Język",
 				"enable_warning": "Włączenie tego sprawi, że Twoja poczekalnia stanie się publiczna dla innych użytkowników BetterCrewLink!",
 				"ban_warning": "Nieodpowiednia nazwa spowoduje otrzymanie blokady od BetterCrewLink."
-			}
+			},
+			"host_notice": "Host ustala ustawienia lobby.",
+			"host_notice_you": "Jesteś hostem; lobby używa twoich ustawień.",
+			"edit_as_host": "Zmień",
+			"tab_current": "Obecne lobby",
+			"tab_mine": "Moje ustawienia",
+			"host": "Host",
+			"host_you": "Ty",
+			"host_unknown": "Nieznany",
+			"no_lobby": "Nie jesteś w lobby. Dołącz lub utwórz grę, by zobaczyć ustawienia.",
+			"mine_notice": "Jako host stosujesz swoje ustawienia dla wszystkich."
+		},
+		"players": {
+			"title": "Gracze",
+			"volume": "Głośność",
+			"empty": "Brak innych graczy. Dołącz do lobby, by zmienić ich głośność.",
+			"disconnected": "Rozłączono",
+			"mute": "Wycisz",
+			"unmute": "Wyłącz wyciszenie",
+			"muted": "Wyciszony"
 		},
 		"customplatforms": {
 			"title": "Niestandardowa platforma",
@@ -51,18 +79,25 @@
 			"microphone_volume": "Głośność mikrofonu",
 			"microphone_sens": "Czułość mikrofonu",
 			"microphone_sens_warning": "Jeśli ustawisz czułość niżej, mikrofon może nie działać.",
+			"auto_gain_disabled": "Wyłączone przy automatycznym wzmocnieniu.",
 			"mastervolume": "Głośność główna",
 			"crewvolume": "Głośność żywych graczy dla duchów",
 			"ghostvolumeasimpostor": "Ghost Volume as Impostor",
 			"test_speaker_start": "Przetestuj dźwięk",
-			"test_speaker_stop": "Zatrzymaj test dźwięku"
+			"test_speaker_stop": "Zatrzymaj test dźwięku",
+			"test_microphone_start": "Testuj mikrofon",
+			"test_microphone_stop": "Zatrzymaj test mikrofonu",
+			"mode": "Tryb głosu"
 		},
 		"keyboard": {
 			"title": "Skróty klawiszowe",
 			"push_to_talk": "Naciśnij by mówić",
 			"mute": "Wycisz mikrofon",
 			"deafen": "Wycisz dźwięk",
-			"impostor_radio": "Radio dla impostorów"
+			"impostor_radio": "Radio dla impostorów",
+			"hint": "Kliknij skrót i naciśnij klawisz lub przycisk myszy. Escape go wyłącza.",
+			"press_key": "Naciśnij klawisz…",
+			"disabled": "Wyłączone"
 		},
 		"overlay": {
 			"title": "Nakładka",
@@ -94,12 +129,13 @@
 		"beta": {
 			"title": "BETA/DEBUG",
 			"mobilehost": "Host mobilny",
-			"vad_enabled": "VAD włączone",
 			"hardware_acceleration": "Przyspieszenie sprzętowe",
 			"hardware_acceleration_warning": "To ustawienie wyłącza akcelerację sprzętową (co może zwiększyć użycie procesora)",
-			"vad_enabled_warning": "Nie będziesz widział kto mówi, jeśli jest wyłączone.",
 			"echocancellation": "Tłumienie echa",
+			"echocancellation_description": "Test mikrofonu pomija redukcję echa. Użyj słuchawek.",
 			"noiseSuppression": "Tłumienie hałasu",
+			"autoGainControl": "Automatyczne wzmocnienie",
+			"autoGainControl_warning": "Beta: mikrofon automatycznie reguluje głośność. Najpierw go przetestuj.",
 			"spatial_audio": "Dźwięk przestrzenny",
 			"oldsampledebug": "Samplerate Debug",
 			"oldsampledebug_warning": "This is a test function ONLY enabled when asked."
@@ -110,7 +146,8 @@
 			"obs_overlay": "Nakładka przeglądarki do OBS",
 			"obs_url": "OBS Browser Source URL",
 			"voice_server_comp": "Tryb kompatybilnośći z serwerem głosowym",
-			"voice_server_comp_warning": "Zaleca się zamianę serwera głosowego na oficjalny serwer BetterCrewlink, czyli https://bettercrewl.ink"
+			"voice_server_comp_warning": "Zaleca się zamianę serwera głosowego na oficjalny serwer BetterCrewlink, czyli https://bettercrewl.ink",
+			"copy_url": "Kopiuj URL"
 		},
 		"troubleshooting": {
 			"title": "Rozwiązywanie problemów",
