@@ -35,7 +35,7 @@ jobs:
     strategy:
       matrix:
         include:
-         - os: windows-2022
+         - os: windows-latest
            dist: 'dist'
            installer: 'dist/Better-CrewLink Setup*.exe'
          - os: ubuntu-latest
@@ -58,9 +58,6 @@ jobs:
         with:
           node-version: 24
           cache: npm
-    
-      - name: Install Python Dependencies
-        run: python -m pip install setuptools
     
       - name: Install Dependencies
         run: npm ci
